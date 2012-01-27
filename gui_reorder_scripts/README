@@ -1,0 +1,28 @@
+Changes to the GUI for the next gvsig-1.12 release. Basically, it changes the order in menus and icons. Thanks to fpsampayo for the work!
+
+
+=== INSTRUCTIONS TO TEST NEW GUI ===
+To test this, you must unzip the attached zip folder "extensions".
+
+**WARNING**: Back up the gvSIG folder "extensiones"  or else all the "config.xml". They will be overwritten!!!
+
+
+=== INSTRUCTIONS TO USE SCRIPTS ===
+
+The python scripts are used to generate the CSV files to analyze and modify a spreadsheet from the configuration files (config.xml) with all the menus and toolbars buttons gvSIG.
+
+To use it you must run from the command line in the 'extensions' of gvSIG to analyze:
+
+$ python parse_gvSIG_config.py
+
+The script will generate multiple tables CSV to '/ tmp' with all the extensions that are loaded in the installation of gvSIG. Also, That extracts data priority, icons, tooltips, etc. buttons and menus.
+
+You can easily change the order and other settings from a convenient spreadsheet: priorities and keyboard shortcuts, and so on.
+
+To implement these changes, run on the command line:
+
+$ python write_gvSIG_config.py
+
+This overrides the config.xml with the new values ​​changed.
+(Attention!! Works more or less and sometimes there are little things to tweak by hand).
+
