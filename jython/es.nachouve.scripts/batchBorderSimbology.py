@@ -113,10 +113,10 @@ def action(e):
 				except Exception, e:
 					JOptionPane.showMessageDialog(None, legend.getClassName() + " not yet implemented!", 
 						"Border Symbology", JOptionPane.WARNING_MESSAGE)
-					accept(e)
+					close(e)
 	return
 
-def accept(e):
+def close(e):
 	frame.dispose()
 	return
 
@@ -159,7 +159,7 @@ def getGUI():
 	slider.setPaintLabels(1)
 
 	applyButton = JButton("Apply", actionPerformed=action)
-	acceptButton = JButton("Accept", actionPerformed=accept)
+	acceptButton = JButton("Cancel", actionPerformed=close)
 
 	frame.add(slider)
 	frame.add(applyButton)
