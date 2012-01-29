@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin-config>
+    <depends plugin-name="org.gvsig.scripting"/>
+    <resourceBundle name="text"/>
+    <libraries library-dir="../org.gvsig.scripting"/>
+    <extensions>
+        <extension class-name="org.gvsig.scripting.ScriptingExtension"
+            active="true" description="Scripts">
+<!--            <menu
+                action-command="run(fileName='gvSIG/extensiones/it.falciano.scripts/batchLegend.py',language='jython')"
+                icon="images/default.png" tooltip="Batch legend"
+                text="Scripts/Vector tools/Batch legend" position="98"/> -->
+
+            <menu
+                action-command="run(fileName='gvSIG/extensiones/es.nachouve.scripts/batchBorderSimbology.py',language='jython')"
+                icon="images/default_red.png" tooltip="Batch Border Simbology"
+                text="Scripts/Change Border" position="1"/> 
+        </extension>
+    </extensions>
+</plugin-config>
