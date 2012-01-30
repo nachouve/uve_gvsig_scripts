@@ -2,12 +2,12 @@
 #################################################################################
 #
 # Project:  gvSIG Jython script samples
-# Name:     batchVectorTransparency.py
-# Purpose:  Apply the same opacity options to a set of vector layers.
-# Author:   Antonio Falciano, afalciano@yahoo.it
+# Name:     batchBorderSymbology.py
+# Purpose:  Apply the same border symbology to a set of vector layers.
+# Author:   Nacho Varela, nachouve@gmail.com
 #
 #################################################################################
-# Copyright (c) 2011, Antonio Falciano <afalciano@yahoo.it>
+# Copyright (c) 2012, Nacho Varela <nachouve@gmail.com>
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -35,13 +35,13 @@ from gvsiglib import *
 from javax.swing import JOptionPane, JFrame, JCheckBox, JSlider, JButton, JLabel, JColorChooser, JTextField
 from java.awt import FlowLayout, Dimension, Color
 
-color = Color(200, 40, 40, 125)
+color = Color(0, 0, 0, 125)
 
 def getActiveLayers():
 	view=gvSIG.getActiveDocument()
 	if view.getClass().getCanonicalName() <> 'com.iver.cit.gvsig.project.documents.view.gui.View':
 		JOptionPane.showMessageDialog(None, 
-			"The active document is not a view.", "Batch Transparency", JOptionPane.WARNING_MESSAGE)
+			"The active document is not a view.", "Border Symbology", JOptionPane.WARNING_MESSAGE)
 		return
 	else:
 		mctrl=view.getMapControl()
@@ -56,27 +56,54 @@ def setBorder(sym, ncolor, nwidth, nalpha):
 
 	# Molaria poner el mismo que el relleno.
 	if (sym.getClassName() == 'com.iver.cit.gvsig.fmap.core.symbols.SimpleFillSymbol'):
-		print "Fill"
 		outline = sym.getOutline()
 		outline.setLineWidth(nwidth)
 		outline.setLineColor(ncolor)
 		outline.setAlpha(nalpha)
 		sym.setOutline(outline)
-		return sym
-
-	print "alpha:"+str(nalpha)
-	print "width:"+str(nwidth)
-	print sym
-	sym.setLineColor(lineColor)
-	sym.setLineWidth(nwidth)
-	sym.setAlpha(nalpha)
+	else:
+		sym.setLineColor(lineColor)
+		sym.setLineWidth(nwidth)
+		sym.setAlpha(nalpha)
 	return sym
+
+def getFirstSymbol():
+	color_alpha_width = {}
+	activeLayers=getActiveLayers()
+	if (len(activeLayers)>0):
+		lyr=activeLayers[0]
+		if lyr.getClass().getCanonicalName() == "com.iver.cit.gvsig.fmap.layers.FLyrVect":
+			legend=lyr.getLegend()
+			print legend
+			if legend.getClassName() == 'com.iver.cit.gvsig.fmap.rendering.SingleSymbolLegend':
+				sym = legend.getDefaultSymbol()
+				color_alpha_width["color"] = sym.getColor()
+				color_alpha_width["alpha"] = sym.getAlpha()
+				if (sym.getClassName() == 'com.iver.cit.gvsig.fmap.core.symbols.SimpleLineSymbol'):
+					color_alpha_width["width"] = sym.getLineWidth()
+			elif legend.getClassName() == 'com.iver.cit.gvsig.fmap.rendering.VectorialUniqueValueLegend':
+				sym = legend.getSymbol(0)
+				if (sym.getClassName() == 'com.iver.cit.gvsig.fmap.core.symbols.SimpleFillSymbol'):
+					color_alpha_width["color"] = sym.getOutline().getColor()
+					color_alpha_width["width"] = sym.getOutline().getLineWidth()
+					color_alpha_width["alpha"] = sym.getAlpha()
+			else:
+				try:
+					color_alpha_width["color"] = sym.getOutline().getColor()
+					color_alpha_width["width"] = sym.getOutline().getLineWidth()
+					color_alpha_width["alpha"] = sym.getOutline().getAlpha()
+				except Exception, e:
+					JOptionPane.showMessageDialog(None, legend.getClassName() + " not yet implemented!", 
+								      "Border Symbology", JOptionPane.WARNING_MESSAGE)
+					close(e)
+	print sym
+	return color_alpha_width
 
 def action(e):
 
 	global color
 	alpha = slider.getValue() * 255 / 100
-	width = int(widthTF.getText())
+	width = float(widthTF.getText())
 	
 	activeLayers=getActiveLayers()
 	for i in range(len(activeLayers)):
@@ -114,35 +141,53 @@ def action(e):
 					JOptionPane.showMessageDialog(None, legend.getClassName() + " not yet implemented!", 
 						"Border Symbology", JOptionPane.WARNING_MESSAGE)
 					close(e)
+	changeColorGUI()
+	return
+
+def accept(e):
+	action(e)
+	frame.dispose()
 	return
 
 def close(e):
 	frame.dispose()
 	return
 
+def changeColorGUI():
+	global color, colorTF
+	alpha = slider.getValue() * 255 / 100
+
+	color = Color(color.getRed(), color.getGreen(), color.getBlue(), alpha)
+	colorTF.setText(color.toString())
+	colorTF.setBackground(color)
+	print color
+	print colorTF.getBackground()
+
 def colorChooser(e):
 	global color
 	colorChooser = JColorChooser()
-	color = colorChooser.showDialog(None, "Border Color", Color.BLACK)
-	colorTF.setText(color.toString())
-	return 
+	color = colorChooser.showDialog(None, "Border Color", color)
+	changeColorGUI()
+	return
 
-
-def getGUI():
+def getGUI(sym_dict):
 	global frame, outCheckbox, fillCheckbox, slider, colorTF, widthTF
 	frame = JFrame("Border Symbology", defaultCloseOperation=JFrame.DISPOSE_ON_CLOSE, 
 		       bounds=(100, 100, 450, 200), layout=FlowLayout(), resizable=0)
 
 	colorL = JLabel('Color: ')
 	colorTF = JTextField(20)
+	color = sym_dict["color"]
+	color = Color(color.getRed(), color.getGreen(), color.getBlue(), sym_dict["alpha"])
+	colorTF.setBackground(color)
 	colorB = JButton('...', actionPerformed=colorChooser)
 	frame.add(colorL)
 	frame.add(colorTF)
 	frame.add(colorB)
 
 	widthL = JLabel('Width: ')
-	widthTF = JTextField(2)
-	widthTF.setText(str(5))
+	widthTF = JTextField(3)
+	widthTF.setText(str(sym_dict["width"]))
 	frame.add(widthL)
 	frame.add(widthTF)
 
@@ -152,14 +197,14 @@ def getGUI():
 	# Create a horizontal slider with min=0, max=100, value=50
 	slider = JSlider()
 	slider.setPreferredSize(Dimension(200, 50))
-	slider.setValue(100)
+	slider.setValue(sym_dict["alpha"]*100/255)
 	slider.setMajorTickSpacing(25)
 	slider.setMinorTickSpacing(5)
 	slider.setPaintTicks(1)
 	slider.setPaintLabels(1)
 
 	applyButton = JButton("Apply", actionPerformed=action)
-	acceptButton = JButton("Cancel", actionPerformed=close)
+	acceptButton = JButton("Accept", actionPerformed=accept)
 
 	frame.add(slider)
 	frame.add(applyButton)
@@ -187,7 +232,9 @@ def main():
 				"Border Symbology", JOptionPane.WARNING_MESSAGE)
 			return
 		else:
-			getGUI()
+			color_alpha_width = getFirstSymbol()
+			getGUI(color_alpha_width)
+
 			return
 
 main()
