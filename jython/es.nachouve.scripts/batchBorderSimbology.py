@@ -35,8 +35,6 @@ from gvsiglib import *
 from javax.swing import JOptionPane, JFrame, JCheckBox, JSlider, JButton, JLabel, JColorChooser, JTextField
 from java.awt import FlowLayout, Dimension, Color
 
-color = Color(0, 0, 0, 125)
-
 def getActiveLayers():
 	view=gvSIG.getActiveDocument()
 	if view.getClass().getCanonicalName() <> 'com.iver.cit.gvsig.project.documents.view.gui.View':
@@ -86,7 +84,7 @@ def getFirstSymbol():
 				if (sym.getClassName() == 'com.iver.cit.gvsig.fmap.core.symbols.SimpleFillSymbol'):
 					color_alpha_width["color"] = sym.getOutline().getColor()
 					color_alpha_width["width"] = sym.getOutline().getLineWidth()
-					color_alpha_width["alpha"] = sym.getAlpha()
+					color_alpha_width["alpha"] = sym.getOutline().getAlpha()
 			else:
 				try:
 					color_alpha_width["color"] = sym.getOutline().getColor()
@@ -100,10 +98,11 @@ def getFirstSymbol():
 	return color_alpha_width
 
 def action(e):
-
-	global color
+	global color, alpha, width
+	color = colorTF.getBackground()
 	alpha = slider.getValue() * 255 / 100
 	width = float(widthTF.getText())
+	changeColorGUI(color)
 	
 	activeLayers=getActiveLayers()
 	for i in range(len(activeLayers)):
@@ -113,7 +112,7 @@ def action(e):
 			if legend.getClassName() == 'com.iver.cit.gvsig.fmap.rendering.SingleSymbolLegend':
 				sym = legend.getDefaultSymbol()
 				if lyr.getShapeType() == 1:   # points
-					color = sym.getColor()
+					#color = sym.getColor()
 					newColor = Color(color.getRed(), color.getGreen(), color.getBlue(), alpha)
 					sym.setColor(newColor)					
 				elif lyr.getShapeType() == 2:  # lines
@@ -128,7 +127,7 @@ def action(e):
 					for j in range(len(syms)):
 						sym=syms[j]
 						if lyr.getShapeType() == 1:   # points
-							color = sym.getColor()
+							#color = sym.getColor()
 							newColor = Color(color.getRed(), color.getGreen(), color.getBlue(), alpha)
 							sym.setColor(newColor)
 						elif lyr.getShapeType() == 2:  # lines
@@ -141,7 +140,6 @@ def action(e):
 					JOptionPane.showMessageDialog(None, legend.getClassName() + " not yet implemented!", 
 						"Border Symbology", JOptionPane.WARNING_MESSAGE)
 					close(e)
-	changeColorGUI()
 	return
 
 def accept(e):
@@ -153,21 +151,25 @@ def close(e):
 	frame.dispose()
 	return
 
-def changeColorGUI():
-	global color, colorTF
+def changeColorGUI(ncolor):
+	global color, alpha, colorTF
 	alpha = slider.getValue() * 255 / 100
 
-	color = Color(color.getRed(), color.getGreen(), color.getBlue(), alpha)
+	color = Color(ncolor.getRed(), ncolor.getGreen(), ncolor.getBlue(), alpha)
+	colorTF.setText("")
 	colorTF.setText(color.toString())
+	# To avoid transparency to the before color on the textField 
+	colorTF.setBackground(Color(255,255,255,255))
 	colorTF.setBackground(color)
 	print color
+	print alpha
 	print colorTF.getBackground()
 
 def colorChooser(e):
 	global color
 	colorChooser = JColorChooser()
 	color = colorChooser.showDialog(None, "Border Color", color)
-	changeColorGUI()
+	changeColorGUI(color)
 	return
 
 def getGUI(sym_dict):
@@ -180,6 +182,8 @@ def getGUI(sym_dict):
 	color = sym_dict["color"]
 	color = Color(color.getRed(), color.getGreen(), color.getBlue(), sym_dict["alpha"])
 	colorTF.setBackground(color)
+	colorTF.setText(color.toString())
+
 	colorB = JButton('...', actionPerformed=colorChooser)
 	frame.add(colorL)
 	frame.add(colorTF)
