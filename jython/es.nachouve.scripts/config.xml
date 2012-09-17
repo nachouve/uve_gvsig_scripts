@@ -11,10 +11,18 @@
                 icon="images/default.png" tooltip="Batch legend"
                 text="Scripts/Vector tools/Batch legend" position="98"/> -->
 
-            <menu
-                action-command="run(fileName='gvSIG/extensiones/es.nachouve.scripts/batchBorderSimbology.py',language='jython')"
-                icon="images/default_red.png" tooltip="Batch Border Simbology"
-                text="Scripts/Change Border" position="1"/> 
+            <menu position="2" 
+		  text="Scripts/Change Border" 
+		  tooltip="Batch Border Simbology" 
+		  icon="images/default_red.png" 
+		  action-command="run(fileName='gvSIG/extensiones/es.nachouve.scripts/batchBorderSimbology.py',language='jython')"
+		  /> 
+	    <menu position="1" 
+		  text="Scripts/CSV to SQL" 
+		  tooltip="CSV to SQL" 
+		  icon="images/default_green.png" 
+		  action-command="run(fileName='gvSIG/extensiones/es.nachouve.scripts/csv2sql.py',language='jython')"
+		  />
         </extension>
     </extensions>
 </plugin-config>
